@@ -1,5 +1,7 @@
 node_modules/
 dist/
+.env
+.trae/mcp.json
 *.local
 npm-debug.log*
 .DS_Store

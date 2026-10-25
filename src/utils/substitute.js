@@ -8,8 +8,9 @@ import { filterSafe } from '../services/mcpClient.js';
 
 /**
  * 汇总套餐各营养字段。
- * price：官网不披露单品价格，全部为 null 时 totals.price 为 null；
- * 其余字段对非 null 数值求和并取整，若整列全为 null 则结果为 null。
+ * price：单品价格来自门店菜单匹配（未匹配单品为 null）。为避免"部分求和"
+ * 冒充整套真实总价，仅当方案内全部单品均有价格时才输出总价，否则为 null；
+ * 其余营养字段对非 null 数值求和并取整，若整列全为 null 则结果为 null。
  * @param {{meals: Array<{items: Array<object>}>}} plan 套餐
  * @returns {{calories: number|null, protein: number|null, carbs: number|null, fat: number|null, sodium: number|null, price: number|null}}
  */
@@ -18,20 +19,26 @@ export function sumPlan(plan) {
   const totals = {};
   for (const f of fields) {
     let hasValue = false;
+    let allValue = true;
     let sum = 0;
     for (const meal of plan?.meals ?? []) {
       for (const item of meal.items ?? []) {
-        if (typeof item[f] === 'number' && !Number.isNaN(item[f])) {
+        const ok = typeof item[f] === 'number' && !Number.isNaN(item[f]);
+        if (ok) {
           hasValue = true;
           sum += item[f];
+        } else {
+          allValue = false;
         }
       }
     }
     if (!hasValue) {
       totals[f] = null;
+    } else if (f === 'price') {
+      // 价格：整套全部单品齐备才算真实总价（保留两位小数），否则视为未公开
+      totals[f] = allValue ? Math.round(sum * 100) / 100 : null;
     } else {
-      // 价格可能含小数，保留两位；其余营养字段取整
-      totals[f] = f === 'price' ? Math.round(sum * 100) / 100 : Math.round(sum);
+      totals[f] = Math.round(sum);
     }
   }
   return totals;

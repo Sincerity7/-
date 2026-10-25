@@ -1,4 +1,12 @@
-# Checklist
+{
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": { "Authorization": "Bearer YOUR_MCP_TOKEN" }
+    }
+  }
+}# Checklist
 
 ## 数据
 - [x] `src/data/mcdonalds-menu.json` 覆盖主流品类且 ≥60 个真实麦当劳单品（当前 91 个），营养字段（名称/分类/餐段/热量/蛋白质/碳水/脂肪/钠）来自官网且真实可溯源（核验：WebFetch 抽查 3 个分类 kJ→kcal 换算全部吻合）

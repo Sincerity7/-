@@ -1,8 +1,9 @@
 /**
  * 麦当劳菜单数据访问层（MCP 客户端封装）
  *
- * 当前实现读取内置的官网公开数据快照（src/data/mcdonalds-menu.json）。
- * 未来接入真实"麦当劳 MCP"时，只需替换 getMenu() 的内部实现
+ * 当前实现读取内置的麦当劳 MCP 官方数据快照（src/data/mcdonalds-menu.json，
+ * 由构建期脚本 scripts/fetch-mcp-data.mjs 调用 list-nutrition-foods 生成）。
+ * 如需运行时直连 MCP，只需替换 getMenu() 的内部实现
  * （改为调用 MCP 工具并把返回数据整理成同样的 {meta, items} 结构），
  * 上层调用方（套餐生成 / 单品替换 / Markdown 导出）零改动。
  */

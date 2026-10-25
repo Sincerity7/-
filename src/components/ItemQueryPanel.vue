@@ -1,8 +1,8 @@
 <script setup>
 /**
  * 单品查询面板（Task 7.3）
- * 关键词搜索菜单快照，展示每个单品的营养明细、价格（"未公开"）
- * 与过敏原（推断）+ 推断依据。
+ * 关键词搜索菜单快照，展示每个单品的营养明细、价格（门店菜单匹配价，
+ * 未收录显示"未公开"）与过敏原（推断）+ 推断依据。
  */
 import { computed, ref } from 'vue'
 import { searchItems } from '../services/mcpClient.js'
@@ -15,14 +15,14 @@ const results = computed(() => searchItems(keyword.value))
 /** 餐段中文映射：breakfast→早餐供应，allDay→全天供应 */
 const PERIOD_LABEL = { breakfast: '早餐供应', allDay: '全天供应' }
 
-/** 过敏原单元格文案：null 表示官网未声明 → 显示"未知" */
+/** 过敏原单元格文案：null 表示官方接口未声明且无法推断 → 显示"未知" */
 function allergenText(row) {
-  if (row.allergens == null) return '未知（官网未声明）'
+  if (row.allergens == null) return '未知（官方未声明）'
   if (row.allergens.length === 0) return '无'
   return row.allergens.join('、')
 }
 
-/** 价格单元格文案：官网不披露单品价格，全部为 null */
+/** 价格单元格文案：门店菜单未收录（null）时显示"未公开" */
 function priceText(row) {
   return row.price == null ? '未公开' : `¥${row.price}`
 }
@@ -53,7 +53,7 @@ function priceText(row) {
     </el-input>
 
     <p class="query-hint">
-      数据来源：麦当劳中国官网公开产品页快照（2025-04 标注口径）。价格官网未公开；过敏原为推断数据，非官方声明。
+      数据来源：麦当劳 MCP 官方接口 list-nutrition-foods（160 个单品，2026-10-26 拉取）。价格来自 MCP 门店菜单（上海徐家汇餐厅，2026-10-26），未收录单品显示"未公开"；过敏原为推断数据，非官方声明。
     </p>
 
     <!-- 横向滚动容器：窄屏下表格不溢出 -->
@@ -105,7 +105,7 @@ function priceText(row) {
                 </el-tag>
               </template>
               <div v-if="row.allergenBasis" class="basis">{{ row.allergenBasis }}</div>
-              <div v-if="row.allergens == null" class="basis">官网未声明，无法推断</div>
+              <div v-if="row.allergens == null" class="basis">官方未声明，无法推断</div>
             </div>
           </template>
         </el-table-column>

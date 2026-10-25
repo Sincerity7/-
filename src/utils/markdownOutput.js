@@ -7,7 +7,7 @@
 /** 策略展示名与场景标注 */
 const STRATEGY_META = {
   lowcal: { name: '控卡优先', scene: '适合需要严格控制总热量、低钠饮食的日子' },
-  value: { name: '性价比优先', scene: '适合追求每一卡路里蛋白质最大化的日子（官网未公开价格，以蛋白/热量比为代理指标）' },
+  value: { name: '性价比优先', scene: '适合精打细算的日子（门店菜单价格齐备时按整套总价最低，否则以每100kcal蛋白质为代理指标）' },
   satiety: { name: '饱腹感优先', scene: '适合运动量大或容易饿、需要更强饱腹感的日子' },
 };
 
@@ -59,8 +59,8 @@ export function renderPlanMarkdown(plan) {
   // 整套总价
   lines.push(
     totals.price == null
-      ? '**整套总价：** 未公开（官网不披露单品价格）'
-      : `**整套总价：** ¥${totals.price}`
+      ? '**整套总价：** 未公开（门店菜单未收录本方案全部单品价格）'
+      : `**整套总价：** ¥${totals.price}（上海徐家汇餐厅在售菜单 currentPrice 合计）`
   );
   // 整套总热量
   lines.push('');

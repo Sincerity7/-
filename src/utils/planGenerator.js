@@ -27,7 +27,7 @@ export const STRATEGIES = {
   },
   value: {
     strategy: 'value',
-    label: '性价比优先 · 每100kcal蛋白质最高（官网未公开价格，以蛋白/热量比为代理指标）',
+    label: '性价比优先 · 价格齐备按整套总价最低，否则每100kcal蛋白质最高（代理指标）',
   },
   satiety: {
     strategy: 'satiety',
@@ -69,15 +69,26 @@ function buildMealCandidates(staples, sidePool, lo, hi) {
       let carbs = staple.carbs ?? 0;
       let fat = staple.fat ?? 0;
       let sodium = staple.sodium ?? 0;
+      // 组合价：主食+全部配菜均有真实价格才有效，否则 null（性价比策略回退代理指标）
+      let price = typeof staple.price === 'number' ? staple.price : null;
       for (const s of sides) {
         cal += s.calories;
         protein += s.protein ?? 0;
         carbs += s.carbs ?? 0;
         fat += s.fat ?? 0;
         sodium += s.sodium ?? 0;
+        price = typeof s.price === 'number' && price != null ? price + s.price : null;
       }
       if (cal < lo || cal > hi) return;
-      combos.push({ items: [staple, ...sides], calories: cal, protein, carbs, fat, sodium });
+      combos.push({
+        items: [staple, ...sides],
+        calories: cal,
+        protein,
+        carbs,
+        fat,
+        sodium,
+        price: price == null ? null : Math.round(price * 100) / 100,
+      });
     };
 
     pushCombo([]);
@@ -187,9 +198,19 @@ export function generatePlans(opts) {
       const curGap = Math.abs(cur.calories - targetCalories * 0.95);
       if (gap !== curGap) return gap < curGap;
     } else if (strategy === 'value') {
-      const dens = cand.protein / cand.calories;
-      const curDens = cur.protein / cur.calories;
-      if (dens !== curDens) return dens > curDens;
+      // 真实价格优先：双方三餐价格齐备 → 整套总价最低；仅一方齐备 → 齐备方优先；
+      // 均不齐备 → 回退"每100kcal蛋白质"代理指标（保持既有测试语义）
+      const candPriced = cand.price != null;
+      const curPriced = cur.price != null;
+      if (candPriced && curPriced) {
+        if (cand.price !== cur.price) return cand.price < cur.price;
+      } else if (candPriced !== curPriced) {
+        return candPriced;
+      } else {
+        const dens = cand.protein / cand.calories;
+        const curDens = cur.protein / cur.calories;
+        if (dens !== curDens) return dens > curDens;
+      }
     } else {
       const sat = cand.protein + cand.fat;
       const curSat = cur.protein + cur.fat;
@@ -213,6 +234,11 @@ export function generatePlans(opts) {
     carbs: b.carbs + l.carbs + d.carbs,
     fat: b.fat + l.fat + d.fat,
     sodium: b.sodium + l.sodium + d.sodium,
+    // 整套价格：三餐组合价全部齐备才有效（保留两位小数），否则 null
+    price:
+      b.price != null && l.price != null && d.price != null
+        ? Math.round((b.price + l.price + d.price) * 100) / 100
+        : null,
   });
 
   for (const b of mealCands[0]) {

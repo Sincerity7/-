@@ -84,12 +84,12 @@ function handlePlanChange(index, nextPlan) {
       <div class="hero-inner">
         <h1 class="hero-title">麦门<span class="hero-title-accent">减脂营养师</span></h1>
         <p class="hero-tagline">
-          用麦当劳官网公开营养数据，为你配出达标、可控、吃得下去的减脂三餐
+          用麦当劳 MCP 官方营养数据，为你配出达标、可控、吃得下去的减脂三餐
         </p>
         <div class="hero-badges">
-          <span class="source-badge">麦当劳中国官网公开数据快照</span>
+          <span class="source-badge">麦当劳 MCP 官方接口 list-nutrition-foods</span>
           <span v-if="menuMeta?.fetchedAt" class="source-badge source-badge--sub">
-            快照日期 {{ menuMeta.fetchedAt }} · {{ menuItems.length }} 个单品
+            数据拉取于 {{ menuMeta.fetchedAt }} · {{ menuItems.length }} 个单品
           </span>
         </div>
       </div>
@@ -136,10 +136,10 @@ function handlePlanChange(index, nextPlan) {
     <footer class="app-footer">
       <h3 class="footer-title">数据口径声明</h3>
       <ul class="footer-list">
-        <li>营养数据抓自麦当劳中国官网公开产品页（热量按 1 kcal = 4.184 kJ 由千焦换算取整，官网标注更新于 2025 年 4 月）。</li>
-        <li>过敏原为基于餐品名称、常识性配方与官网提示的<b>推断数据，非官方声明</b>；未知项请自行确认。</li>
-        <li>单品价格官网公开页未披露，一律显示"未公开"。</li>
-        <li>本应用为本地数据快照；未来可无缝替换为麦当劳官方 MCP 实时数据源。</li>
+        <li>营养数据来自麦当劳 MCP 官方接口 list-nutrition-foods（160 个单品的能量/蛋白质/脂肪/碳水/钠实测值，构建期由 scripts/fetch-mcp-data.mjs 在线拉取生成）。</li>
+        <li>过敏原为基于餐品名称与常识性配方的<b>推断数据，非官方声明</b>；未知项请自行确认。</li>
+        <li>价格来自 MCP 门店菜单（上海徐家汇餐厅，2026-10-26 在售 currentPrice），未收录单品显示"未公开"。</li>
+        <li>数据快照在构建期生成，浏览器端零 Token 暴露；价格链路已接入 <code>query-nearby-stores</code> + <code>query-meals</code>，价格随门店与时间浮动，下单前以官方渠道实时结果为准。</li>
       </ul>
       <p class="footer-copy">麦门减脂营养师 · 仅供营养参考，不构成医疗建议</p>
     </footer>
